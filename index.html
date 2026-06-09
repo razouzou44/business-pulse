@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Pulse — Diagnostic Personal MBA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f2f8;--bg2:#e8eaf4;--panel:#ffffff;--panel2:#f6f7fb;--panel3:#eef0f8;
+  --ink:#12103a;--muted:#5a587a;--faint:#9896b8;--line:#e0e2f0;--hair:#d4d6ec;
+  --accent:#4f46e5;--accent2:#7c3aed;--accent-s:#eef2ff;
+  --ok:#22c55e;--ok-s:#f0fdf4;--warn:#f59e0b;--warn-s:#fffbeb;--crit:#ef4444;--crit-s:#fef2f2;
+  --shadow:0 1px 3px rgba(18,16,58,.06),0 10px 28px -8px rgba(18,16,58,.16);
+  --r:16px;
+}
+html[data-theme="dark"]{
+  --bg:#080712;--bg2:#0e0c1e;--panel:#14112a;--panel2:#1c1936;--panel3:#221f40;
+  --ink:#ede9ff;--muted:#9896b8;--faint:#5a587a;--line:#2a2748;--hair:#34315c;
+  --accent:#818cf8;--accent2:#a78bfa;--accent-s:#1e1b3a;
+  --ok:#4ade80;--ok-s:#052e16;--warn:#fbbf24;--warn-s:#1c1400;--crit:#f87171;--crit-s:#1c0505;
+  --shadow:0 1px 3px rgba(0,0,0,.4),0 10px 28px -8px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100vh}
+body{font-family:"Hanken Grotesk",system-ui,sans-serif;color:var(--ink);
+  background:radial-gradient(900px 500px at 85% -5%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 60%),
+  radial-gradient(700px 500px at -5% 108%,color-mix(in srgb,var(--accent2) 10%,transparent),transparent 55%),
+  linear-gradient(155deg,var(--bg),var(--bg2));background-attachment:fixed;
+  -webkit-font-smoothing:antialiased;padding-bottom:60px}
+.wrap{max-width:1200px;margin:0 auto;padding:18px 20px 0}
+
+nav{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--ink)}
+.logo{width:34px;height:34px;border-radius:9px;flex:none;position:relative;overflow:hidden;
+  background:linear-gradient(145deg,var(--accent),var(--accent2));box-shadow:0 5px 16px -5px var(--accent)}
+.logo svg{position:absolute;inset:0;width:100%;height:100%}
+.bn{font-family:"Fraunces",serif;font-size:20px;font-weight:600}
+.bn em{color:var(--accent);font-style:normal}
+.crumb{color:var(--faint);font-size:13px}
+.sp{flex:1}
+.pill{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  padding:3px 10px;border-radius:999px;background:var(--accent-s);color:var(--accent)}
+.btn{font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:var(--panel);
+  border:1.5px solid var(--hair);border-radius:11px;padding:9px 16px;color:var(--ink);
+  display:inline-flex;align-items:center;gap:7px;transition:.15s;box-shadow:var(--shadow)}
+.btn:hover{transform:translateY(-1px);border-color:var(--accent)}
+.btn.ghost{background:transparent;box-shadow:none;border-color:transparent}
+.btn.icon{padding:9px;width:38px;justify-content:center}
+.btn.primary{background:linear-gradient(140deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;box-shadow:0 6px 20px -8px var(--accent)}
+.btn.sm{padding:6px 11px;font-size:12px;border-radius:9px;box-shadow:none}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+
+/* TABS */
+.tabs{display:flex;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:6px;box-shadow:var(--shadow);flex-wrap:wrap;margin-bottom:20px}
+.tab{font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:transparent;border:0;color:var(--muted);padding:10px 16px;border-radius:11px;display:flex;align-items:center;gap:8px;transition:.18s;white-space:nowrap}
+.tab:hover{background:var(--panel2);color:var(--ink)}
+.tab.active{background:linear-gradient(145deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 14px -6px var(--accent)}
+.pane{display:none}.pane.active{display:block}
+.ph{margin-bottom:20px}
+.ph h2{font-family:"Fraunces",serif;font-size:24px;font-weight:600;margin-bottom:6px}
+.ph p{color:var(--muted);font-size:14px;line-height:1.55;max-width:620px}
+
+/* RADAR */
+.diag-layout{display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start}
+@media(max-width:800px){.diag-layout{grid-template-columns:1fr}}
+.radar-panel{padding:18px;text-align:center}
+.radar-panel h3{font-family:"Fraunces",serif;font-size:16px;font-weight:600;margin-bottom:12px}
+.score-ring{font-family:"Fraunces",serif;font-size:56px;font-weight:700;line-height:1;margin:8px 0 4px}
+.score-label{font-size:13px;font-weight:700;display:inline-block;padding:4px 14px;border-radius:999px;margin-bottom:12px}
+.health-bars{display:flex;flex-direction:column;gap:7px;margin-top:16px;text-align:left}
+.hbar-row{display:flex;align-items:center;gap:10px}
+.hbar-name{font-size:11px;font-weight:700;width:100px;flex:none;color:var(--muted)}
+.hbar{flex:1;height:7px;background:var(--line);border-radius:999px;overflow:hidden}
+.hbar-fill{height:100%;border-radius:999px;transition:width .4s ease}
+.hbar-val{font-size:11px;font-weight:800;width:28px;text-align:right;flex:none}
+
+/* PROCESS CARDS */
+.processes{display:flex;flex-direction:column;gap:12px}
+.proc-card{background:var(--panel);border:1.5px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+.proc-head{display:flex;align-items:center;gap:12px;padding:15px 18px;cursor:pointer;transition:.15s}
+.proc-head:hover{background:var(--panel2)}
+.proc-icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:19px;flex:none}
+.proc-name{font-family:"Fraunces",serif;font-size:15px;font-weight:600;flex:1}
+.proc-score{font-family:"Fraunces",serif;font-size:20px;font-weight:700}
+.proc-mini-bar{width:80px;height:6px;background:var(--line);border-radius:999px;overflow:hidden;margin-top:4px}
+.proc-mini-fill{height:100%;border-radius:999px;transition:width .4s ease}
+.proc-chev{color:var(--faint);font-size:11px;transition:.2s}
+.proc-card.open .proc-chev{transform:rotate(180deg)}
+.proc-body{display:none;border-top:1px solid var(--line);padding:16px 18px}
+.proc-card.open .proc-body{display:block}
+.proc-desc{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5;font-style:italic}
+.questions{display:flex;flex-direction:column;gap:12px}
+.q-item{display:flex;flex-direction:column;gap:7px}
+.q-text{font-size:13.5px;color:var(--ink);line-height:1.4}
+.q-scale{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.q-dot{width:34px;height:34px;border-radius:9px;border:2px solid var(--hair);cursor:pointer;
+  display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--faint);transition:.15s}
+.q-dot:hover{border-color:var(--accent);color:var(--accent)}
+.q-dot.active{color:#fff;border-color:transparent}
+.q-scale-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--faint);margin-top:2px;font-weight:600}
+
+/* CONTRAINTE */
+.constraint-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:700px){.constraint-layout{grid-template-columns:1fr}}
+.constraint-hero{background:linear-gradient(135deg,var(--accent-s),var(--panel));
+  border:2px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:var(--r);padding:24px}
+.constraint-hero h3{font-family:"Fraunces",serif;font-size:20px;font-weight:600;margin-bottom:8px}
+.constraint-name{font-family:"Fraunces",serif;font-size:32px;font-weight:700;margin:14px 0 8px}
+.chain-diagram{display:flex;flex-direction:column;gap:0;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+.chain-row{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);transition:.2s;gap:12px}
+.chain-row:last-child{border-bottom:none}
+.chain-row.bottleneck{background:var(--crit-s)}
+.chain-icon{font-size:18px;flex:none;width:26px}
+.chain-name{flex:1;font-size:13px;font-weight:700}
+.chain-bar{width:120px;height:7px;background:var(--line);border-radius:999px;overflow:hidden;flex:none}
+.chain-fill{height:100%;border-radius:999px;transition:width .4s ease}
+.chain-score{font-size:12px;font-weight:800;width:36px;text-align:right;flex:none}
+.chain-tag{font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;flex:none}
+
+/* LEVIERS */
+.levier-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+@media(max-width:700px){.levier-layout{grid-template-columns:1fr}}
+.levier-inputs{display:flex;flex-direction:column;gap:14px}
+.levier-card{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
+.levier-card .lk{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+.levier-card .ln{font-family:"Fraunces",serif;font-size:15px;font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.levier-card .ln span{font-size:13px;font-weight:700;color:var(--accent)}
+.levier-card .base-row{display:flex;gap:10px;margin-bottom:10px;align-items:center}
+.levier-card .base-row label{font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap}
+.levier-card .base-row input{font:inherit;font-size:14px;font-weight:700;color:var(--ink);
+  background:var(--panel2);border:1.5px solid var(--line);border-radius:9px;padding:8px 12px;width:100%;transition:.15s}
+.levier-card .base-row input:focus{outline:0;border-color:var(--accent)}
+.slider-row{display:flex;align-items:center;gap:10px}
+.slider-row input[type=range]{flex:1;accent-color:var(--accent);height:6px;cursor:pointer}
+.slider-val{font-size:13px;font-weight:800;color:var(--accent);width:36px;text-align:right;flex:none}
+.result-panel{background:linear-gradient(135deg,var(--accent-s),var(--panel));
+  border:2px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:var(--r);padding:24px;position:sticky;top:20px}
+.result-panel h3{font-family:"Fraunces",serif;font-size:16px;font-weight:600;margin-bottom:18px}
+.rev-now{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+.rev-val{font-family:"Fraunces",serif;font-size:36px;font-weight:700;line-height:1;margin-bottom:16px}
+.rev-arrow{font-size:22px;text-align:center;margin-bottom:8px;color:var(--accent)}
+.rev-proj-label{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.rev-proj{font-family:"Fraunces",serif;font-size:36px;font-weight:700;line-height:1;color:var(--accent);margin-bottom:8px}
+.rev-delta{font-size:14px;font-weight:800;padding:6px 14px;border-radius:999px;display:inline-block;margin-bottom:18px}
+.lever-impacts{display:flex;flex-direction:column;gap:7px}
+.li-row{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:7px 10px;background:var(--panel);border-radius:9px;border:1px solid var(--line)}
+.li-name{font-weight:600;color:var(--muted)}
+.li-val{font-weight:800;color:var(--accent)}
+
+/* PLAN ACTION */
+.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:700px){.plan-grid{grid-template-columns:1fr}}
+.action-card{background:var(--panel);border:1.5px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+.action-card.priority{border-color:var(--crit);background:var(--crit-s)}
+.action-card.priority2{border-color:var(--warn);background:var(--warn-s)}
+.ac-badge{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;padding:3px 10px;border-radius:999px;margin-bottom:10px}
+.ac-name{font-family:"Fraunces",serif;font-size:16px;font-weight:600;margin-bottom:10px}
+.ac-score{font-size:13px;color:var(--muted);margin-bottom:12px}
+.actions-list{display:flex;flex-direction:column;gap:7px}
+.action-item{display:flex;gap:9px;align-items:flex-start;font-size:13px;line-height:1.45;padding:8px 10px;background:var(--panel2);border-radius:9px}
+.action-arrow{flex:none;font-size:12px;margin-top:1px;color:var(--accent)}
+
+/* COPILOT */
+.copilot{display:flex;gap:11px;align-items:flex-start;background:var(--accent-s);
+  border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:13px;padding:13px 16px;margin-top:18px}
+.cp-ic{width:28px;height:28px;border-radius:8px;flex:none;background:linear-gradient(145deg,var(--accent),var(--accent2));color:#fff;display:grid;place-items:center;font-size:15px}
+.cp-msg{font-size:13px;line-height:1.5;color:var(--ink)}
+.cp-msg b{color:var(--accent)}
+
+/* Print */
+.print-view{display:none}
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  body{background:#fff!important}
+  .wrap{display:none!important}
+  .print-view{display:block!important;font-family:"Hanken Grotesk",sans-serif;color:#12103a}
+  @page{size:A4 portrait;margin:1.4cm 1.6cm}
+  .pv-page{page-break-after:always}.pv-page:last-child{page-break-after:avoid}
+}
+.pv-hd{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:3px solid #4f46e5;margin-bottom:16px}
+.pv-title{font-family:"Fraunces",serif;font-size:15px;font-weight:700;color:#12103a}
+.pv-title em{color:#4f46e5;font-style:normal}
+.pv-meta{text-align:right;font-size:10.5px;color:#5a587a}
+.pv-sec{font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#4f46e5;margin:14px 0 8px;display:flex;align-items:center;gap:6px}
+.pv-sec::after{content:"";flex:1;height:1px;background:#e0e2f0}
+.pv-proc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.pv-proc{border-radius:10px;padding:12px 14px;border-left:4px solid}
+.pv-proc .pk{font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;margin-bottom:4px}
+.pv-proc .pv{font-family:"Fraunces",serif;font-size:24px;font-weight:700}
+.pv-proc .pd{font-size:11px;color:#5a587a;margin-top:3px}
+.pv-footer{margin-top:14px;padding-top:10px;border-top:1px solid #e0e2f0;display:flex;justify-content:space-between;font-size:10px;color:#9896b8}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <a href="#" class="brand">
+    <div class="logo">
+      <svg viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 17 L9 17 L12 8 L15 26 L18 12 L21 20 L24 17 L30 17" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <span class="bn">Business <em>Pulse</em></span>
+  </a>
+  <span class="crumb">/ Personal MBA — Kaufman</span>
+  <div class="sp"></div>
+  <span class="pill">Diagnostiquez. Priorisez. Agissez.</span>
+  <button class="btn" id="exportPdf" style="border-color:var(--accent);color:var(--accent)">📄 Export PDF</button>
+  <button class="btn ghost icon" id="themeBtn">🌙</button>
+</nav>
+
+<div class="tabs">
+  <button class="tab active" data-tab="diag">🩺 Diagnostic</button>
+  <button class="tab" data-tab="constraint">⛓️ Contrainte</button>
+  <button class="tab" data-tab="levier">📈 Leviers de revenus</button>
+  <button class="tab" data-tab="plan">🎯 Plan d'action</button>
+</div>
+
+<!-- PANE 1: DIAGNOSTIC -->
+<div class="pane active" id="pane-diag">
+  <div class="ph"><h2>Diagnostic des 5 Processus</h2><p>Evaluez chaque processus de 1 (tres faible) a 5 (excellent). Cliquez sur un processus pour le developper.</p></div>
+  <div class="diag-layout">
+    <div class="card radar-panel">
+      <h3>Sante globale de l'entreprise</h3>
+      <svg viewBox="0 0 320 320" id="radarSvg" style="max-width:260px;margin:0 auto;display:block"></svg>
+      <div class="score-ring" id="globalScore">-</div>
+      <div class="score-label" id="globalLabel">Non evalue</div>
+      <div class="health-bars" id="healthBars"></div>
+    </div>
+    <div class="processes" id="processList"></div>
+  </div>
+  <div class="copilot">
+    <div class="cp-ic">⚡</div>
+    <p class="cp-msg" id="diagMsg">Kaufman dit que chaque entreprise est une chaine de 5 processus. <b>Un seul maillon faible suffit a limiter toute la performance.</b> Completez le diagnostic pour identifier le votre.</p>
+  </div>
+</div>
+
+<!-- PANE 2: CONTRAINTE -->
+<div class="pane" id="pane-constraint">
+  <div class="ph"><h2>La Contrainte — Theory of Constraints</h2><p>Goldratt (cite par Kaufman) : a tout moment, <b>une seule contrainte</b> limite la performance de votre systeme. Reparez-la en priorite.</p></div>
+  <div class="constraint-layout">
+    <div class="constraint-hero" id="constraintHero"></div>
+    <div class="chain-diagram" id="chainDiagram"></div>
+  </div>
+  <div class="copilot" style="margin-top:18px">
+    <div class="cp-ic">⚡</div>
+    <p class="cp-msg" id="constraintMsg">Ameliorer un processus qui <b>n'est pas la contrainte</b> ne sert a rien — l'entreprise continuera d'etre limitee par son maillon le plus faible. Commencez par reparer la contrainte, puis identifiez la suivante.</p>
+  </div>
+</div>
+
+<!-- PANE 3: LEVIERS -->
+<div class="pane" id="pane-levier">
+  <div class="ph"><h2>Les 4 Leviers de Revenus</h2><p>Kaufman identifie 4 seules facons d'augmenter les revenus. Simulez l'impact de chacun sur votre chiffre d'affaires.</p></div>
+  <div class="levier-layout">
+    <div class="levier-inputs" id="levierInputs"></div>
+    <div class="result-panel" id="levierResult"></div>
+  </div>
+  <div class="copilot" style="margin-top:18px">
+    <div class="cp-ic">⚡</div>
+    <p class="cp-msg">La plupart des entreprises se concentrent uniquement sur l'acquisition de nouveaux clients (levier 1). Pourtant, <b>augmenter la frequence d'achat</b> ou <b>la valeur par transaction</b> est souvent plus rapide et moins couteux.</p>
+  </div>
+</div>
+
+<!-- PANE 4: PLAN ACTION -->
+<div class="pane" id="pane-plan">
+  <div class="ph"><h2>Plan d'action prioritaire</h2><p>Base sur votre diagnostic — les actions les plus impactantes par processus, dans l'ordre de priorite.</p></div>
+  <div class="plan-grid" id="planGrid"></div>
+  <div class="copilot" style="margin-top:18px">
+    <div class="cp-ic">⚡</div>
+    <p class="cp-msg" id="planMsg">Completez d'abord le <b>diagnostic</b> (onglet 1) pour generer un plan d'action personnalise. Sans donnees, les recommandations restent generiques.</p>
+  </div>
+</div>
+</div>
+
+<div class="print-view" id="printView"></div>
+
+<script>
+(function(){
+"use strict";
+
+var PROCESSES = [
+  { id:"value", name:"Creation de Valeur", icon:"💎", color:"#4f46e5",
+    desc:"Creez-vous quelque chose que les gens veulent vraiment ?",
+    questions:[
+      "Les clients reachètent-ils spontanement, sans relance de votre part ?",
+      "Avez-vous valide votre marche avec de vrais paiements (pas seulement des avis positifs) ?",
+      "Votre offre resout-elle un probleme que les clients decrivent eux-memes comme douloureux ?",
+      "Votre proposition de valeur unique est-elle claire et differentiatrice ?",
+      "La valeur percue par le client est-elle nettement superieure au prix demande ?"
+    ],
+    actions:[
+      "Interviewer 5 clients actuels sur leur probleme principal — pas sur votre solution",
+      "Identifier les 3 alternatives que vos clients utilisaient avant vous",
+      "Tester une hausse de prix de 20 % : si personne ne part, votre valeur est sous-estimee",
+      "Reformuler votre proposition de valeur en 1 phrase : [Client] qui [probleme], notre [offre] [benefice unique]"
+    ]
+  },
+  { id:"marketing", name:"Marketing", icon:"📣", color:"#7c3aed",
+    desc:"Les bonnes personnes savent-elles que vous existez ?",
+    questions:[
+      "Avez-vous au moins un canal marketing qui genere regulierement des prospects ?",
+      "Votre cout d'acquisition client (CAC) est-il connu et maitrise ?",
+      "Votre message differencie-t-il clairement votre offre des alternatives ?",
+      "Des prospects vous trouvent-ils sans que vous les cherchiez activement (inbound) ?",
+      "Votre audience cible comprend-elle immediatement ce que vous faites et pour qui ?"
+    ],
+    actions:[
+      "Choisir UN seul canal prioritaire et le maitriser avant de diversifier",
+      "Calculer votre CAC reel : budget marketing divise par nombre de clients acquis",
+      "Recueillir 3 verbatims clients et les utiliser tels quels dans vos messages",
+      "Creer 1 contenu utile par semaine qui repond a la question principale de votre client"
+    ]
+  },
+  { id:"sales", name:"Ventes", icon:"🤝", color:"#0891b2",
+    desc:"Les prospects se convertissent-ils en clients ?",
+    questions:[
+      "Votre taux de conversion prospects vers clients est-il connu et suivi ?",
+      "Votre processus de vente est-il documente, predictible et reproductible ?",
+      "Les prospects hesitent-ils peu ou pas sur le prix (confiance etablie) ?",
+      "Avez-vous un suivi structure des prospects qui n'ont pas encore achete ?",
+      "Vos clients signent-ils sans avoir a etre relances plus de 2 fois ?"
+    ],
+    actions:[
+      "Documenter les 5 objections les plus frequentes et preparer une reponse par ecrit",
+      "Ajouter une garantie ou une offre d'essai pour reduire le risque percu",
+      "Mettre en place un CRM simple (meme un tableur) pour suivre chaque prospect",
+      "Analyser les 3 derniers contrats perdus : quelle est la vraie raison du non ?"
+    ]
+  },
+  { id:"delivery", name:"Livraison de Valeur", icon:"🚀", color:"#059669",
+    desc:"Livrez-vous ce que vous avez promis, de facon fiable ?",
+    questions:[
+      "Vos clients sont-ils satisfaits au point de vous recommander spontanement ?",
+      "Votre systeme de livraison est-il documente, reproductible et scalable ?",
+      "Votre taux de churn (depart clients) est-il faible et en diminution ?",
+      "Les delais et les promesses faites lors de la vente sont-ils toujours respectes ?",
+      "Recevez-vous des temoignages positifs et des recommandations sans les solliciter ?"
+    ],
+    actions:[
+      "Creer un processus d'onboarding client clair : que se passe-t-il apres l'achat ?",
+      "Mettre en place un suivi a J+7, J+30, J+90 pour chaque nouveau client",
+      "Documenter vos procedures de livraison pour qu'elles soient independantes de vous",
+      "Collecter activement des temoignages : envoyer 1 email de demande a chaque client satisfait"
+    ]
+  },
+  { id:"finance", name:"Finance", icon:"💰", color:"#d97706",
+    desc:"Les chiffres vous permettent-ils de continuer et de grandir ?",
+    questions:[
+      "Connaissez-vous exactement votre marge nette sur chaque produit ou service ?",
+      "L'entreprise genere-t-elle suffisamment pour vous remunerer correctement ?",
+      "Avez-vous une tresorerie positive couvrant au moins 3 mois de charges ?",
+      "Les charges fixes sont-elles sous controle et justifiees par la valeur creee ?",
+      "Avez-vous une visibilite sur les revenus prevus des 3 prochains mois ?"
+    ],
+    actions:[
+      "Calculer la marge sur chaque offre : prix de vente minus tous les couts directs",
+      "Identifier les 20 % de clients qui generent 80 % du chiffre d'affaires",
+      "Mettre en place un tableau de bord mensuel : CA, charges, marge, tresorerie",
+      "Tester une offre d'abonnement ou de retainer pour securiser des revenus recurrents"
+    ]
+  }
+];
+
+var scores = {};
+PROCESSES.forEach(function(p){ scores[p.id] = [0,0,0,0,0]; });
+
+var levierState = { clients:100, panier:150, freq:4, prixPct:0, clientsPct:0, panierPct:0, freqPct:0 };
+
+/* ===== TABS ===== */
+document.querySelectorAll(".tab").forEach(function(t){
+  t.addEventListener("click", function(){
+    document.querySelectorAll(".tab").forEach(function(x){ x.classList.remove("active"); });
+    document.querySelectorAll(".pane").forEach(function(x){ x.classList.remove("active"); });
+    t.classList.add("active");
+    document.getElementById("pane-"+t.dataset.tab).classList.add("active");
+    if(t.dataset.tab==="constraint") renderConstraint();
+    if(t.dataset.tab==="plan") renderPlan();
+  });
+});
+
+/* ===== HELPERS ===== */
+function processScore(pid){
+  var s = scores[pid];
+  var filled = s.filter(function(v){ return v>0; }).length;
+  if(filled===0) return -1;
+  var sum = s.reduce(function(a,b){ return a+b; }, 0);
+  return Math.round(sum / (5*5) * 100);
+}
+
+function healthColor(sc){
+  if(sc<0) return "var(--faint)";
+  if(sc<40) return "var(--crit)";
+  if(sc<70) return "var(--warn)";
+  return "var(--ok)";
+}
+
+function healthLabel(sc){
+  if(sc<0) return "Non evalue";
+  if(sc<40) return "Critique";
+  if(sc<70) return "A ameliorer";
+  return "Sain";
+}
+
+function globalAvg(){
+  var evaluated = PROCESSES.filter(function(p){ return processScore(p.id)>=0; });
+  if(evaluated.length===0) return -1;
+  var sum = evaluated.reduce(function(a,p){ return a+processScore(p.id); }, 0);
+  return Math.round(sum/evaluated.length);
+}
+
+/* ===== RADAR ===== */
+var NS = "http://www.w3.org/2000/svg";
+function mk(t,a){ var e=document.createElementNS(NS,t); for(var k in a) e.setAttribute(k,a[k]); return e; }
+
+function drawRadar(){
+  var svg = document.getElementById("radarSvg"); svg.innerHTML="";
+  var cx=160,cy=160,maxR=108;
+  var n=5;
+  var angles = PROCESSES.map(function(_,i){ return (i*2*Math.PI/n) - Math.PI/2; });
+  var pts = angles.map(function(a){ return [cx+maxR*Math.cos(a), cy+maxR*Math.sin(a)]; });
+
+  // Grid rings
+  [25,50,75,100].forEach(function(pct){
+    var r=maxR*pct/100;
+    var gpts = angles.map(function(a){ return (cx+r*Math.cos(a))+","+(cy+r*Math.sin(a)); }).join(" ");
+    svg.appendChild(mk("polygon",{points:gpts,fill:"none",stroke:"var(--line)","stroke-width":1}));
+  });
+
+  // Axes
+  pts.forEach(function(p){
+    svg.appendChild(mk("line",{x1:cx,y1:cy,x2:p[0],y2:p[1],stroke:"var(--hair)","stroke-width":1}));
+  });
+
+  // Data polygon
+  var dpts = PROCESSES.map(function(p,i){
+    var sc = processScore(p.id); var r = sc<0?0:maxR*sc/100;
+    return (cx+r*Math.cos(angles[i]))+","+(cy+r*Math.sin(angles[i]));
+  }).join(" ");
+  svg.appendChild(mk("polygon",{points:dpts,fill:"color-mix(in srgb,var(--accent) 20%,transparent)",stroke:"var(--accent)","stroke-width":2.5}));
+
+  // Dots + labels
+  PROCESSES.forEach(function(p,i){
+    var sc=processScore(p.id); var r=sc<0?0:maxR*sc/100;
+    var dx=cx+r*Math.cos(angles[i]), dy=cy+r*Math.sin(angles[i]);
+    svg.appendChild(mk("circle",{cx:dx,cy:dy,r:5,fill:sc<0?"var(--faint)":p.color,stroke:"white","stroke-width":2}));
+    var lx=cx+(maxR+18)*Math.cos(angles[i]), ly=cy+(maxR+18)*Math.sin(angles[i]);
+    var anchor="middle";
+    if(lx<cx-10) anchor="end"; else if(lx>cx+10) anchor="start";
+    var t=mk("text",{x:lx,y:ly+4,"text-anchor":anchor,"font-size":10,"font-weight":700,fill:"var(--muted)","font-family":"Hanken Grotesk,sans-serif"});
+    t.textContent=p.icon; svg.appendChild(t);
+  });
+
+  // Global score display
+  var ga=globalAvg();
+  var scoreEl=document.getElementById("globalScore");
+  scoreEl.textContent=ga<0?"-":ga;
+  scoreEl.style.color=healthColor(ga);
+  var labelEl=document.getElementById("globalLabel");
+  labelEl.textContent=healthLabel(ga);
+  var lc=healthColor(ga);
+  var lb=ga<0?"var(--panel2)":ga<40?"var(--crit-s)":ga<70?"var(--warn-s)":"var(--ok-s)";
+  labelEl.style.background=lb; labelEl.style.color=lc;
+
+  // Health bars
+  var bars=document.getElementById("healthBars"); bars.innerHTML="";
+  PROCESSES.forEach(function(p){
+    var sc=processScore(p.id); var c=healthColor(sc);
+    var row=document.createElement("div"); row.className="hbar-row";
+    row.innerHTML='<div class="hbar-name">'+p.icon+" "+p.name.split(" ")[0]+'</div>'+
+      '<div class="hbar"><div class="hbar-fill" style="width:'+(sc<0?0:sc)+'%;background:'+c+'"></div></div>'+
+      '<div class="hbar-val" style="color:'+c+'">'+(sc<0?"?":sc)+'</div>';
+    bars.appendChild(row);
+  });
+}
+
+/* ===== PROCESS LIST ===== */
+function renderProcesses(){
+  var list=document.getElementById("processList"); list.innerHTML="";
+  PROCESSES.forEach(function(p){
+    var sc=processScore(p.id); var c=healthColor(sc);
+    var card=document.createElement("div"); card.className="proc-card";
+    var head=document.createElement("div"); head.className="proc-head";
+    head.innerHTML='<div class="proc-icon" style="background:color-mix(in srgb,'+p.color+' 15%,transparent)">'+p.icon+'</div>'+
+      '<div style="flex:1"><div class="proc-name">'+p.name+'</div><div class="proc-desc" style="margin:0;font-size:11.5px;color:var(--muted);font-style:normal">'+p.desc+'</div></div>'+
+      '<div style="text-align:right;margin-right:8px"><div class="proc-score" style="color:'+c+'">'+(sc<0?"?":sc)+'</div>'+
+      '<div class="proc-mini-bar"><div class="proc-mini-fill" style="width:'+(sc<0?0:sc)+'%;background:'+c+'"></div></div></div>'+
+      '<div class="proc-chev">▼</div>';
+    head.onclick=function(){ card.classList.toggle("open"); };
+    var body=document.createElement("div"); body.className="proc-body";
+    var desc=document.createElement("div"); desc.className="proc-desc";
+    desc.textContent="Evaluez de 1 (jamais / tres mal) a 5 (toujours / excellent).";
+    body.appendChild(desc);
+    var qs=document.createElement("div"); qs.className="questions";
+    p.questions.forEach(function(q,qi){
+      var item=document.createElement("div"); item.className="q-item";
+      var qt=document.createElement("div"); qt.className="q-text"; qt.textContent=q;
+      var scaleRow=document.createElement("div"); scaleRow.className="q-scale";
+      for(var d=1;d<=5;d++){
+        var dot=document.createElement("div"); dot.className="q-dot"+(scores[p.id][qi]>=d?" active":"");
+        dot.textContent=d;
+        dot.style.background=scores[p.id][qi]>=d?p.color:"transparent";
+        dot.style.borderColor=scores[p.id][qi]>=d?p.color:"var(--hair)";
+        dot.style.color=scores[p.id][qi]>=d?"#fff":"var(--faint)";
+        (function(val){
+          dot.onclick=function(){
+            scores[p.id][qi]=val;
+            renderProcesses(); drawRadar(); computeDiagMsg();
+          };
+        })(d);
+        scaleRow.appendChild(dot);
+      }
+      var labels=document.createElement("div"); labels.className="q-scale-labels";
+      labels.style.width="194px";
+      labels.innerHTML='<span>Jamais</span><span>Parfois</span><span>Toujours</span>';
+      item.append(qt,scaleRow,labels); qs.appendChild(item);
+    });
+    body.appendChild(qs); card.append(head,body); list.appendChild(card);
+  });
+}
+
+function computeDiagMsg(){
+  var ga=globalAvg();
+  var worst=null; var worstSc=999;
+  PROCESSES.forEach(function(p){ var sc=processScore(p.id); if(sc>=0&&sc<worstSc){worstSc=sc;worst=p;} });
+  var msg;
+  if(ga<0) msg="Kaufman dit que chaque entreprise est une chaine de 5 processus. <b>Un seul maillon faible suffit a limiter toute la performance.</b> Completez le diagnostic pour identifier le votre.";
+  else if(ga<40) msg="Score global critique ("+ga+"/100). Plusieurs processus sont en difficulte — commencez par la contrainte principale. Rendez-vous sur l'onglet <b>Contrainte</b>.";
+  else if(ga<70) msg="Score de "+ga+"/100 — des marges de progression importantes existent, notamment sur <b>"+( worst?worst.name:"vos processus faibles")+"</b>. L'onglet <b>Plan d'action</b> vous guidera.";
+  else msg="Excellent score de "+ga+"/100 ✦ Votre entreprise est en bonne sante. Utilisez les <b>Leviers de revenus</b> pour passer a la prochaine etape de croissance.";
+  document.getElementById("diagMsg").innerHTML=msg;
+}
+
+/* ===== CONTRAINTE ===== */
+function renderConstraint(){
+  var evaluated=PROCESSES.filter(function(p){ return processScore(p.id)>=0; });
+  var hero=document.getElementById("constraintHero"); hero.innerHTML="";
+  var chain=document.getElementById("chainDiagram"); chain.innerHTML="";
+  var msg;
+
+  if(evaluated.length===0){
+    hero.innerHTML='<h3>Aucun diagnostic realise</h3><p style="color:var(--muted);margin-top:10px;font-size:14px">Completez d\'abord le <b>Diagnostic</b> (onglet 1) pour identifier votre contrainte principale.</p>';
+    document.getElementById("constraintMsg").innerHTML="Completez le diagnostic pour identifier votre contrainte principale.";
+    return;
+  }
+
+  var sorted=[].concat(PROCESSES).filter(function(p){return processScore(p.id)>=0;}).sort(function(a,b){return processScore(a.id)-processScore(b.id);});
+  var bottleneck=sorted[0];
+  var btSc=processScore(bottleneck.id);
+
+  hero.innerHTML='<h3>Votre contrainte principale</h3>'+
+    '<p style="color:var(--muted);font-size:13px;line-height:1.5;margin-top:6px">'+
+    'C\'est ici que votre systeme est le plus limite. Toute amelioration ailleurs aura peu d\'impact tant que ce processus n\'est pas repare.</p>'+
+    '<div class="constraint-name" style="color:'+bottleneck.color+'">'+bottleneck.icon+' '+bottleneck.name+'</div>'+
+    '<div style="font-family:Fraunces,serif;font-size:48px;font-weight:700;color:var(--crit);margin-bottom:8px">'+btSc+' / 100</div>'+
+    '<p style="font-size:13px;color:var(--muted);line-height:1.5">'+bottleneck.desc+'</p>'+
+    '<div style="margin-top:16px;padding:12px 14px;background:var(--crit-s);border-radius:10px;border-left:4px solid var(--crit)">'+
+    '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--crit);margin-bottom:5px">Action prioritaire</div>'+
+    '<div style="font-size:13px;color:var(--ink);line-height:1.45">'+bottleneck.actions[0]+'</div></div>';
+
+  var sorted2=[].concat(PROCESSES).filter(function(p){return processScore(p.id)>=0;}).sort(function(a,b){return processScore(a.id)-processScore(b.id);});
+  PROCESSES.forEach(function(p){
+    var sc=processScore(p.id); var c=healthColor(sc); var isBottle=p.id===bottleneck.id;
+    var row=document.createElement("div"); row.className="chain-row"+(isBottle?" bottleneck":"");
+    row.innerHTML='<span class="chain-icon">'+p.icon+'</span>'+
+      '<span class="chain-name">'+p.name+'</span>'+
+      '<div class="chain-bar"><div class="chain-fill" style="width:'+(sc<0?0:sc)+'%;background:'+c+'"></div></div>'+
+      '<span class="chain-score" style="color:'+c+'">'+(sc<0?"?":sc)+'</span>'+
+      (isBottle?'<span class="chain-tag" style="background:var(--crit-s);color:var(--crit)">GOULOT</span>':'');
+    chain.appendChild(row);
+  });
+
+  msg=sorted.length>1
+    ? "Apres avoir repare <b>"+bottleneck.name+"</b>, votre prochain goulot sera <b>"+sorted[1].name+"</b> (score : "+processScore(sorted[1].id)+"/100). La methode Kaufman : reparez la contrainte, puis identifiez la suivante — c'est un cycle continu."
+    : "Concentrez toute votre energie sur <b>"+bottleneck.name+"</b>. Kaufman appelle ca la regle d'or : ne jamais laisser la contrainte etre en attente.";
+  document.getElementById("constraintMsg").innerHTML=msg;
+}
+
+/* ===== LEVIERS ===== */
+function renderLeviers(){
+  var inp=document.getElementById("levierInputs"); inp.innerHTML="";
+  var levers=[
+    {id:"clients",label:"Nombre de clients actifs",icon:"👥",unit:"clients",pctId:"clientsPct"},
+    {id:"panier",label:"Valeur moyenne par transaction",icon:"🛒",unit:"€",pctId:"panierPct"},
+    {id:"freq",label:"Frequence d'achat par an",icon:"🔁",unit:"fois/an",pctId:"freqPct"},
+    {id:"prix",label:"Augmentation des prix",icon:"💲",unit:"%",pctId:"prixPct",isPrice:true}
+  ];
+  levers.forEach(function(l){
+    var card=document.createElement("div"); card.className="levier-card";
+    card.innerHTML='<div class="lk">Levier</div>'+
+      '<div class="ln">'+l.icon+' '+l.label+'<span id="lv-'+l.id+'">+'+levierState[l.pctId]+'%</span></div>';
+    if(!l.isPrice){
+      var br=document.createElement("div"); br.className="base-row";
+      var lbl=document.createElement("label"); lbl.textContent="Valeur actuelle :";
+      var ipt=document.createElement("input"); ipt.type="number"; ipt.value=levierState[l.id]; ipt.min="0";
+      ipt.oninput=(function(lid){return function(){levierState[lid]=parseFloat(this.value)||0; updateResult();}})(l.id);
+      br.append(lbl,ipt); card.appendChild(br);
+    }
+    var sr=document.createElement("div"); sr.className="slider-row";
+    var rng=document.createElement("input"); rng.type="range"; rng.min="0"; rng.max=l.isPrice?"50":"100"; rng.step="5"; rng.value=levierState[l.pctId];
+    var sv=document.createElement("div"); sv.className="slider-val"; sv.id="sv-"+l.id; sv.textContent="+"+levierState[l.pctId]+"%";
+    rng.oninput=(function(pid,svid,lvid){return function(){
+      levierState[pid]=parseInt(this.value);
+      document.getElementById(svid).textContent="+"+this.value+"%";
+      document.getElementById(lvid).textContent="+"+this.value+"%";
+      updateResult();
+    };})(l.pctId,"sv-"+l.id,"lv-"+l.id);
+    sr.append(rng,sv); card.appendChild(sr); inp.appendChild(card);
+  });
+  updateResult();
+}
+
+function fmt(n){ return new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n); }
+
+function updateResult(){
+  var C=levierState.clients, P=levierState.panier, F=levierState.freq;
+  var now=C*P*F;
+  var nC=C*(1+levierState.clientsPct/100);
+  var nP=P*(1+levierState.panierPct/100)*(1+levierState.prixPct/100);
+  var nF=F*(1+levierState.freqPct/100);
+  var proj=nC*nP*nF;
+  var delta=now>0?Math.round((proj-now)/now*100):0;
+  var res=document.getElementById("levierResult"); res.innerHTML=
+    '<h3>Simulation revenus annuels</h3>'+
+    '<div class="rev-now">Chiffre d\'affaires actuel</div>'+
+    '<div class="rev-val">'+fmt(now)+'</div>'+
+    '<div class="rev-arrow">↓</div>'+
+    '<div class="rev-proj-label">Chiffre d\'affaires projete</div>'+
+    '<div class="rev-proj">'+fmt(proj)+'</div>'+
+    '<div class="rev-delta" style="background:'+(delta>=0?"var(--ok-s)":"var(--crit-s)")+'";color:'+(delta>=0?"var(--ok)":"var(--crit)")+'">'+
+    (delta>=0?"+":"")+delta+'%</div>'+
+    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--faint);margin-bottom:8px">Detail par levier</div>'+
+    '<div class="lever-impacts">'+
+    '<div class="li-row"><span class="li-name">👥 Clients</span><span class="li-val">x'+(1+levierState.clientsPct/100).toFixed(2)+'</span></div>'+
+    '<div class="li-row"><span class="li-name">🛒 Panier</span><span class="li-val">x'+(1+levierState.panierPct/100).toFixed(2)+'</span></div>'+
+    '<div class="li-row"><span class="li-name">🔁 Frequence</span><span class="li-val">x'+(1+levierState.freqPct/100).toFixed(2)+'</span></div>'+
+    '<div class="li-row"><span class="li-name">💲 Prix</span><span class="li-val">+'+levierState.prixPct+'%</span></div>'+
+    '</div>';
+  document.getElementById("levierResult").querySelector(".rev-delta").style.color=delta>=0?"var(--ok)":"var(--crit)";
+}
+
+/* ===== PLAN D'ACTION ===== */
+function renderPlan(){
+  var grid=document.getElementById("planGrid"); grid.innerHTML="";
+  var evaluated=PROCESSES.filter(function(p){ return processScore(p.id)>=0; });
+  if(evaluated.length===0){
+    grid.innerHTML='<div style="grid-column:1/-1;color:var(--muted);font-size:14px;padding:20px 0">Completez le diagnostic (onglet 1) pour generer votre plan d\'action personnalise.</div>';
+    document.getElementById("planMsg").innerHTML="Completez d'abord le <b>diagnostic</b> (onglet 1) pour generer un plan d'action personnalise.";
+    return;
+  }
+  var sorted=[].concat(evaluated).sort(function(a,b){ return processScore(a.id)-processScore(b.id); });
+  sorted.forEach(function(p,rank){
+    var sc=processScore(p.id); var c=healthColor(sc);
+    var card=document.createElement("div");
+    card.className="action-card"+(rank===0?" priority":rank===1?" priority2":"");
+    var badgeStyle=rank===0?"background:var(--crit-s);color:var(--crit)":rank===1?"background:var(--warn-s);color:var(--warn)":"background:var(--accent-s);color:var(--accent)";
+    var badgeText=rank===0?"Priorite absolue":rank===1?"Priorite haute":"A ameliorer";
+    card.innerHTML='<div class="ac-badge" style="'+badgeStyle+'">'+badgeText+'</div>'+
+      '<div class="ac-name">'+p.icon+' '+p.name+'</div>'+
+      '<div class="ac-score">Score actuel : <b style="color:'+c+'">'+sc+'/100</b></div>'+
+      '<div class="actions-list">'+
+      p.actions.map(function(a){ return '<div class="action-item"><span class="action-arrow">→</span><span>'+a+'</span></div>'; }).join("")+
+      '</div>';
+    grid.appendChild(card);
+  });
+  var worst=sorted[0];
+  document.getElementById("planMsg").innerHTML=
+    "Priorite #1 : <b>"+worst.name+"</b> ("+processScore(worst.id)+"/100). "+
+    "Kaufman rappelle que l'amelioration d'un processus non-contraignant <b>n'ameliore pas les resultats globaux</b>. Focalisez-vous.";
+}
+
+/* ===== PDF EXPORT ===== */
+document.getElementById("exportPdf").onclick=function(){
+  var today=new Date().toLocaleDateString("fr-FR",{day:"2-digit",month:"long",year:"numeric"});
+  var ga=globalAvg();
+  var rows=PROCESSES.map(function(p){
+    var sc=processScore(p.id); var c=sc<0?"#9896b8":sc<40?"#ef4444":sc<70?"#f59e0b":"#22c55e";
+    var bg=sc<0?"#f6f7fb":sc<40?"#fef2f2":sc<70?"#fffbeb":"#f0fdf4";
+    return '<div class="pv-proc" style="border-color:'+c+';background:'+bg+'">'+
+      '<div class="pk" style="color:'+c+'">'+p.name+'</div>'+
+      '<div class="pv">'+p.icon+' '+(sc<0?"?":sc)+'/100</div>'+
+      '<div class="pd">'+p.desc+'</div></div>';
+  }).join("");
+  var worst=PROCESSES.filter(function(p){return processScore(p.id)>=0;}).sort(function(a,b){return processScore(a.id)-processScore(b.id);})[0];
+  document.getElementById("printView").innerHTML=
+    '<div class="pv-page">'+
+    '<div class="pv-hd"><div><div class="pv-title">Business <em>Pulse</em> — Diagnostic Personal MBA</div></div>'+
+    '<div class="pv-meta"><b>Rapport de sante</b>'+today+'</div></div>'+
+    '<div class="pv-sec">Sante globale</div>'+
+    '<div style="font-family:Fraunces,serif;font-size:48px;font-weight:700;color:'+(ga<0?"#9896b8":ga<40?"#ef4444":ga<70?"#f59e0b":"#22c55e")+'">'+
+    (ga<0?"-":ga)+'/100 — '+(ga<0?"Non evalue":ga<40?"Critique":ga<70?"A ameliorer":"Sain")+'</div>'+
+    '<div class="pv-sec">Les 5 processus</div>'+
+    '<div class="pv-proc-grid">'+rows+'</div>'+
+    (worst?'<div class="pv-sec">Contrainte principale</div>'+
+    '<div style="padding:14px;background:#fef2f2;border-left:4px solid #ef4444;border-radius:8px">'+
+    '<b>'+worst.name+'</b> ('+processScore(worst.id)+'/100) — '+worst.actions[0]+'</div>':'')+'</div>';
+  setTimeout(function(){window.print();},120);
+};
+
+/* ===== THEME ===== */
+document.getElementById("themeBtn").onclick=function(){
+  var dark=document.documentElement.getAttribute("data-theme")==="dark";
+  document.documentElement.setAttribute("data-theme",dark?"light":"dark");
+  this.textContent=dark?"🌙":"☀️";
+  drawRadar();
+};
+
+/* ===== INIT ===== */
+renderProcesses();
+drawRadar();
+renderLeviers();
+})();
+</script>
+</body>
+</html>
