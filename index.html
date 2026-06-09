@@ -368,6 +368,7 @@ var scores = {};
 PROCESSES.forEach(function(p){ scores[p.id] = [0,0,0,0,0]; });
 
 var levierState = { clients:100, panier:150, freq:4, prixPct:0, clientsPct:0, panierPct:0, freqPct:0 };
+var openProcs = {};
 
 /* ===== TABS ===== */
 document.querySelectorAll(".tab").forEach(function(t){
@@ -482,13 +483,17 @@ function renderProcesses(){
   PROCESSES.forEach(function(p){
     var sc=processScore(p.id); var c=healthColor(sc);
     var card=document.createElement("div"); card.className="proc-card";
+    if(openProcs[p.id]) card.classList.add("open");
     var head=document.createElement("div"); head.className="proc-head";
     head.innerHTML='<div class="proc-icon" style="background:color-mix(in srgb,'+p.color+' 15%,transparent)">'+p.icon+'</div>'+
       '<div style="flex:1"><div class="proc-name">'+p.name+'</div><div class="proc-desc" style="margin:0;font-size:11.5px;color:var(--muted);font-style:normal">'+p.desc+'</div></div>'+
-      '<div style="text-align:right;margin-right:8px"><div class="proc-score" style="color:'+c+'">'+(sc<0?"?":sc)+'</div>'+
-      '<div class="proc-mini-bar"><div class="proc-mini-fill" style="width:'+(sc<0?0:sc)+'%;background:'+c+'"></div></div></div>'+
+      '<div style="text-align:right;margin-right:8px"><div class="proc-score" id="pscore-'+p.id+'" style="color:'+c+'">'+(sc<0?"?":sc)+'</div>'+
+      '<div class="proc-mini-bar"><div class="proc-mini-fill" id="pmbar-'+p.id+'" style="width:'+(sc<0?0:sc)+'%;background:'+c+'"></div></div></div>'+
       '<div class="proc-chev">▼</div>';
-    head.onclick=function(){ card.classList.toggle("open"); };
+    head.onclick=function(){
+      card.classList.toggle("open");
+      openProcs[p.id]=card.classList.contains("open");
+    };
     var body=document.createElement("div"); body.className="proc-body";
     var desc=document.createElement("div"); desc.className="proc-desc";
     desc.textContent="Evaluez de 1 (jamais / tres mal) a 5 (toujours / excellent).";
@@ -504,12 +509,26 @@ function renderProcesses(){
         dot.style.background=scores[p.id][qi]>=d?p.color:"transparent";
         dot.style.borderColor=scores[p.id][qi]>=d?p.color:"var(--hair)";
         dot.style.color=scores[p.id][qi]>=d?"#fff":"var(--faint)";
-        (function(val){
+        (function(val, scaleRef, pid, qidx){
           dot.onclick=function(){
-            scores[p.id][qi]=val;
-            renderProcesses(); drawRadar(); computeDiagMsg();
+            scores[pid][qidx]=val;
+            // Mettre à jour les dots visuellement sans reconstruire
+            Array.from(scaleRef.querySelectorAll(".q-dot")).forEach(function(d,di){
+              var dv=di+1;
+              d.style.background=dv<=val?p.color:"transparent";
+              d.style.borderColor=dv<=val?p.color:"var(--hair)";
+              d.style.color=dv<=val?"#fff":"var(--faint)";
+            });
+            // Mettre à jour le score du processus
+            var newSc=processScore(pid);
+            var newC=healthColor(newSc);
+            var scEl=document.getElementById("pscore-"+pid);
+            var barEl=document.getElementById("pmbar-"+pid);
+            if(scEl){scEl.textContent=newSc<0?"?":newSc; scEl.style.color=newC;}
+            if(barEl){barEl.style.width=(newSc<0?0:newSc)+"%"; barEl.style.background=newC;}
+            drawRadar(); computeDiagMsg();
           };
-        })(d);
+        })(d, scaleRow, p.id, qi);
         scaleRow.appendChild(dot);
       }
       var labels=document.createElement("div"); labels.className="q-scale-labels";
