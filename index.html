@@ -484,56 +484,73 @@ function renderProcesses(){
     var sc=processScore(p.id); var c=healthColor(sc);
     var card=document.createElement("div"); card.className="proc-card";
     if(openProcs[p.id]) card.classList.add("open");
+
+    /* ---- HEADER (toggle) ---- */
     var head=document.createElement("div"); head.className="proc-head";
-    head.innerHTML='<div class="proc-icon" style="background:color-mix(in srgb,'+p.color+' 15%,transparent)">'+p.icon+'</div>'+
-      '<div style="flex:1"><div class="proc-name">'+p.name+'</div><div class="proc-desc" style="margin:0;font-size:11.5px;color:var(--muted);font-style:normal">'+p.desc+'</div></div>'+
-      '<div style="text-align:right;margin-right:8px"><div class="proc-score" id="pscore-'+p.id+'" style="color:'+c+'">'+(sc<0?"?":sc)+'</div>'+
-      '<div class="proc-mini-bar"><div class="proc-mini-fill" id="pmbar-'+p.id+'" style="width:'+(sc<0?0:sc)+'%;background:'+c+'"></div></div></div>'+
-      '<div class="proc-chev">▼</div>';
-    head.onclick=function(){
-      card.classList.toggle("open");
-      openProcs[p.id]=card.classList.contains("open");
-    };
+    var scoreSpan=document.createElement("div"); scoreSpan.className="proc-score";
+    scoreSpan.id="pscore-"+p.id; scoreSpan.style.color=c; scoreSpan.textContent=sc<0?"?":sc;
+    var barFill=document.createElement("div"); barFill.className="proc-mini-fill";
+    barFill.id="pmbar-"+p.id; barFill.style.width=(sc<0?0:sc)+"%"; barFill.style.background=c;
+    var barWrap=document.createElement("div"); barWrap.className="proc-mini-bar"; barWrap.appendChild(barFill);
+    var scoreBox=document.createElement("div"); scoreBox.style.cssText="text-align:right;margin-right:8px";
+    scoreBox.append(scoreSpan,barWrap);
+    var iconEl=document.createElement("div"); iconEl.className="proc-icon";
+    iconEl.style.background="color-mix(in srgb,"+p.color+" 15%,transparent)"; iconEl.textContent=p.icon;
+    var infoEl=document.createElement("div"); infoEl.style.flex="1";
+    infoEl.innerHTML='<div class="proc-name">'+p.name+'</div><div style="font-size:11.5px;color:var(--muted)">'+p.desc+'</div>';
+    var chevEl=document.createElement("div"); chevEl.className="proc-chev"; chevEl.textContent="▼";
+    head.append(iconEl,infoEl,scoreBox,chevEl);
+
+    /* Clic sur le header uniquement */
+    head.addEventListener("click", function(e){
+      e.stopPropagation();
+      openProcs[p.id]=!openProcs[p.id];
+      card.classList.toggle("open", openProcs[p.id]);
+    });
+
+    /* ---- BODY (questions) ---- */
     var body=document.createElement("div"); body.className="proc-body";
-    var desc=document.createElement("div"); desc.className="proc-desc";
-    desc.textContent="Evaluez de 1 (jamais / tres mal) a 5 (toujours / excellent).";
-    body.appendChild(desc);
+    /* Bloquer toute remontée d'événement depuis le body */
+    body.addEventListener("click", function(e){ e.stopPropagation(); });
+
+    var desc2=document.createElement("div"); desc2.className="proc-desc";
+    desc2.textContent="Evaluez de 1 (jamais) a 5 (excellent) — cliquez sur un chiffre.";
+    body.appendChild(desc2);
     var qs=document.createElement("div"); qs.className="questions";
+
     p.questions.forEach(function(q,qi){
       var item=document.createElement("div"); item.className="q-item";
       var qt=document.createElement("div"); qt.className="q-text"; qt.textContent=q;
       var scaleRow=document.createElement("div"); scaleRow.className="q-scale";
+      var dotEls=[];
       for(var d=1;d<=5;d++){
-        var dot=document.createElement("div"); dot.className="q-dot"+(scores[p.id][qi]>=d?" active":"");
-        dot.textContent=d;
-        dot.style.background=scores[p.id][qi]>=d?p.color:"transparent";
-        dot.style.borderColor=scores[p.id][qi]>=d?p.color:"var(--hair)";
-        dot.style.color=scores[p.id][qi]>=d?"#fff":"var(--faint)";
-        (function(val, scaleRef, pid, qidx){
-          dot.onclick=function(){
+        var dot=document.createElement("div"); dot.className="q-dot";
+        dot.textContent=d; dotEls.push(dot);
+        (function(val,dotsArr,pid,qidx,col){
+          dot.addEventListener("click", function(e){
+            e.stopPropagation();
             scores[pid][qidx]=val;
-            // Mettre à jour les dots visuellement sans reconstruire
-            Array.from(scaleRef.querySelectorAll(".q-dot")).forEach(function(d,di){
+            /* Mettre a jour les dots */
+            dotsArr.forEach(function(dd,di){
               var dv=di+1;
-              d.style.background=dv<=val?p.color:"transparent";
-              d.style.borderColor=dv<=val?p.color:"var(--hair)";
-              d.style.color=dv<=val?"#fff":"var(--faint)";
+              dd.style.background=dv<=val?col:"transparent";
+              dd.style.borderColor=dv<=val?col:"var(--hair)";
+              dd.style.color=dv<=val?"#fff":"var(--faint)";
             });
-            // Mettre à jour le score du processus
-            var newSc=processScore(pid);
-            var newC=healthColor(newSc);
+            /* Mettre a jour score dans le header */
+            var newSc=processScore(pid); var newC=healthColor(newSc);
             var scEl=document.getElementById("pscore-"+pid);
             var barEl=document.getElementById("pmbar-"+pid);
             if(scEl){scEl.textContent=newSc<0?"?":newSc; scEl.style.color=newC;}
             if(barEl){barEl.style.width=(newSc<0?0:newSc)+"%"; barEl.style.background=newC;}
             drawRadar(); computeDiagMsg();
-          };
-        })(d, scaleRow, p.id, qi);
+          });
+        })(d, dotEls, p.id, qi, p.color);
         scaleRow.appendChild(dot);
       }
       var labels=document.createElement("div"); labels.className="q-scale-labels";
       labels.style.width="194px";
-      labels.innerHTML='<span>Jamais</span><span>Parfois</span><span>Toujours</span>';
+      labels.innerHTML="<span>Jamais</span><span>Parfois</span><span>Toujours</span>";
       item.append(qt,scaleRow,labels); qs.appendChild(item);
     });
     body.appendChild(qs); card.append(head,body); list.appendChild(card);
